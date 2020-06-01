@@ -15,15 +15,19 @@ module "vpc" {
   vpc_cidr = "${var.vpc_cidr}"
  
   public_subnet_enable = true
-  public_subnet_count = 1
+  public_subnet_count = 3
   public_subnet_zones = [
     "ap-northeast-2a",
+    "ap-northeast-2b",
+    "ap-northeast-2c",
   ]
   public_subnet_cidrs = "${var.public_subnet_cidrs}"
   private_subnet_enable = true
-  private_subnet_count = 1
+  private_subnet_count = 3
   private_subnet_zones = [
     "ap-northeast-2a",
+    "ap-northeast-2b",
+    "ap-northeast-2c",
   ]
   private_subnet_cidrs = "${var.private_subnet_cidrs}"
   single_nat_gateway = true

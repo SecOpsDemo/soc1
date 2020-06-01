@@ -13,11 +13,15 @@ vpc_cidr = "10.101.0.0/16"    # 그냥 사용해도 되지만, 상황에 맞게 
 # 그냥 사용해도 되지만, 상황에 맞게 변경해서 사용 가능
 public_subnet_cidrs = [
   "10.101.35.0/24",
+  "10.101.36.0/24",
+  "10.101.37.0/24",
 ]
 
 # 그냥 사용해도 되지만, 상황에 맞게 변경해서 사용 가능
 private_subnet_cidrs = [
   "10.101.38.0/24",
+  "10.101.39.0/24",
+  "10.101.40.0/24",
 ]
 sg_name = "node"
 sg_desc = "Security group for all worker nodes in the cluster"             
