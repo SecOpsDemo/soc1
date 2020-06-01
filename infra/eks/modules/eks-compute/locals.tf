@@ -71,6 +71,5 @@ EOF
 }
 
 locals {
-
   subnet_ids = var.subnet_ids
 }

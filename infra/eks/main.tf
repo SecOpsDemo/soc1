@@ -149,21 +149,21 @@ output "import_command-1" {
   value = "${module.eks-domain.import_command1}"
 }
 
-# module "efs" {
-#   # source = "git::https://github.com/opsnow-tools/valve-eks.git//modules/efs?ref=v0.0.7"
-#   source = "./modules/efs"
-#   region = "${var.aws_region}"
-#   city   = "${var.city}"
-#   stage  = "${var.stage}"
-#   name   = var.cluster_name
-#   suffix = "${var.suffix}"
-#   vpc_id = "${module.vpc.vpc_id}"
-#   subnet_ids = "${module.vpc.private_subnet_ids}"
-#   mount_target_sg = ["${module.eks-compute.worknode_security_group_id}"]
-# }
-# output "efs_id" {
-#     value = "\nterraform import module.efs.aws_efs_file_system.efs ${module.efs.efs_id}\n"
-# }
-# output "efs_mount_target_ids" {
-#     value = "\nterraform import 'module.efs.aws_efs_mount_target.efs[0]' ${join("\nterraform import 'module.efs.aws_efs_mount_target.efs[*]' ", module.efs.efs_mount_target_ids)}\n"
-# }
+module "efs" {
+  # source = "git::https://github.com/opsnow-tools/valve-eks.git//modules/efs?ref=v0.0.7"
+  source = "./modules/efs"
+  region = "${var.aws_region}"
+  city   = "${var.city}"
+  stage  = "${var.stage}"
+  name   = var.cluster_name
+  suffix = "${var.suffix}"
+  vpc_id = "${module.vpc.vpc_id}"
+  subnet_ids = "${module.vpc.private_subnet_ids}"
+  mount_target_sg = ["${module.eks-compute.worknode_security_group_id}"]
+}
+output "efs_id" {
+    value = "\nterraform import module.efs.aws_efs_file_system.efs ${module.efs.efs_id}\n"
+}
+output "efs_mount_target_ids" {
+    value = "\nterraform import 'module.efs.aws_efs_mount_target.efs[0]' ${join("\nterraform import 'module.efs.aws_efs_mount_target.efs[*]' ", module.efs.efs_mount_target_ids)}\n"
+}
