@@ -1,0 +1,17 @@
+efs-provisioner:
+  awsRegion: ap-northeast-2
+    efsFileSystemId: fs-28022949
+    path: /shared
+    provisionerName: seoul-mss-soc1-eks/efs
+    storageClass:
+      gidAllocate:
+        enabled: true
+        gidMax: 50000
+        gidMin: 40000
+      isDefault: false
+      name: efs
+      reclaimPolicy: Retain
+  nameOverride: efs-provisioner
+
+
+

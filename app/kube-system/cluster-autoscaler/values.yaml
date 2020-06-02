@@ -1,0 +1,27 @@
+cluster-autoscaler:
+  nameOverride: cluster-autoscaler
+
+  autoDiscovery:
+    clusterName: seoul-mss-soc0-eks
+    enabled: true
+
+  awsRegion: ap-northeast-2
+
+  extraArgs:
+    expander: random
+    logtostderr: true
+    scale-down-enabled: true
+    scale-down-utilization-threshold: 0.75
+    skip-nodes-with-local-storage: false
+    skip-nodes-with-system-pods: false
+    stderrthreshold: info
+    v: 4
+
+  rbac:
+    create: true
+    pspEnabled: true
+
+  sslCertPath: /etc/ssl/certs/ca-bundle.crt
+
+
+

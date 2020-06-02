@@ -1,0 +1,32 @@
+kubernetes-dashboard:
+  # chart-repo: stable/kubernetes-dashboard
+  # chart-version: 1.4.0
+  # chart-ingress: true
+  # chart-pdb: N 1
+
+  nameOverride: kubernetes-dashboard
+
+  # podAnnotations:
+  #   cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+
+  enableInsecureLogin: true
+
+  service:
+    type: ClusterIP
+    externalPort: 9090
+
+  ingress:
+    enabled: "true"
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    hosts:
+      - dashboard.soc1.bespin-mss.com
+
+  extraArgs:
+    - --token-ttl=14400
+  #   - --enable-skip-login
+  #   - --enable-insecure-login
+  #   - --system-banner="Welcome to Kubernetes"
+  #   - --tls-key-file=k8sm.key
+  #   - --tls-cert-file=k8sm.crt
