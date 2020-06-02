@@ -108,7 +108,7 @@ module "eks-compute" {
   map_roles = [
     {
       # AWS IAM Role, 사전에 생성되어 있어야 함. AdministratorAccess 정책이 맵핑되어 있어야 함.
-      rolearn  = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/SEOUL-MSS-K8S-BASTION"
+      rolearn  = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/SEOUL-MSS-SOC1-BASTION"
       # 쿠버네티스 RBAC 사용자이름, 기본값이므로 그냥 사용.
       username = "iam_role_bastion"
       # 쿠버네티스 RBAC 그룹, 기본값이므로 그냥 사용.

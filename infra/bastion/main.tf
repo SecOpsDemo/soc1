@@ -13,7 +13,7 @@ module "bastion" {
 
   region = "ap-northeast-2"
   city   = "SEOUL"
-  stage  = "MMS"
+  stage  = "MSS"
   name   = "SOC1"
   suffix = "BASTION"
 
@@ -25,7 +25,7 @@ module "bastion" {
   # ami_id = ""
   type = "t2.micro"
 
-  key_name = "SEOUL-MMS-K8S-BASTION"
+  key_name = "SEOUL-MSS-SOC1-BASTION"
 
   allow_ip_address = [
     "58.151.93.9/32", # 강남 echo "$(curl -sL icanhazip.com)/32"
