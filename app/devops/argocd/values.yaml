@@ -1,0 +1,49 @@
+argo-cd:
+  configs:
+    secret:
+      argocdServerAdminPassword: $2a$10$z6DA5uGyaEdG0fwxn1HLWe.YX4Yj/EZ873qu3xxBjzRk1AEPZx8ZW
+      createSecret: true
+  dex:
+    enabled: true
+    image:
+      repository: quay.io/dexidp/dex
+      tag: v2.14.0
+  global:
+    image:
+      repository: argoproj/argocd
+      tag: v1.4.2
+  redis:
+    enabled: true
+    image:
+      repository: redis
+      tag: 5.0.3
+  repoServer:
+    image:
+      repository: argoproj/argocd
+      tag: v1.4.2
+    replicas: 1
+  server:
+    config:
+      help.chatText: Chat with bespinglobal SRE team!
+      help.chatUrl: https://bespin-sre.slack.com/
+      repositories: |
+        - type: helm
+          url: https://chartmuseum-devops.soc1.bespin-mss.com
+          name: soc1.bespin-mss.com
+      url: https://argocd-devops.soc1.bespin-mss.com
+    extraArgs:
+      insecure: true
+    image:
+      repository: argoproj/argocd
+      tag: v1.4.2
+    ingress:
+      annotations:
+        kubernetes.io/ingress.class: nginx
+        nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+      enabled: true
+      hosts:
+      - argocd-devops.soc1.bespin-mss.com
+    rbacConfig:
+      policy.default: role:readonly
+    replicas: 1
