@@ -11,8 +11,8 @@ nginx-ingress:
         memory: 512Mi
     autoscaling:
       enabled: true
-      maxReplicas: 9
-      minReplicas: 3
+      maxReplicas: 5
+      minReplicas: 2
       targetCPUUtilizationPercentage: 60
       targetMemoryUtilizationPercentage: 60
     config:
