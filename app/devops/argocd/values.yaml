@@ -27,10 +27,13 @@ argo-cd:
       help.chatText: Chat with bespinglobal SRE team!
       help.chatUrl: https://bespin-sre.slack.com/
       repositories: |
+        - url: https://github.com/SecOpsDemo/soc1.git
         - type: helm
           url: https://kubernetes-charts.storage.googleapis.com
           name: stable
-      url: https://argocd.soc1.bespin-mss.com
+        - type: helm
+          url: https://kubernetes.github.io/dashboard
+          name: kubernetes-dashboard
     extraArgs:
       insecure: true
     image:

@@ -1,15 +1,12 @@
 kubernetes-dashboard:
-  # chart-repo: stable/kubernetes-dashboard
-  # chart-version: 1.4.0
-  # chart-ingress: true
-  # chart-pdb: N 1
-
   nameOverride: kubernetes-dashboard
 
   # podAnnotations:
   #   cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
 
-  enableInsecureLogin: true
+  # It removes enableSkipLogin and enableInsecureLogin parameters. Please use extraEnv instead
+  # enableInsecureLogin: true
+  protocolHttp: true
 
   service:
     type: ClusterIP
@@ -25,6 +22,7 @@ kubernetes-dashboard:
 
   extraArgs:
     - --token-ttl=14400
+    - --enable-insecure-login
   #   - --enable-skip-login
   #   - --enable-insecure-login
   #   - --system-banner="Welcome to Kubernetes"
