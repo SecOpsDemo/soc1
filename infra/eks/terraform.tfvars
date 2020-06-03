@@ -38,7 +38,7 @@ source_sg_cidrs = [
     },
 ]
 
-kubernetes_version = "1.16"
+kubernetes_version = "1.15"
 
 # 쿠버네티스 워크노드에 대한 설정
 # The type of the instance.
