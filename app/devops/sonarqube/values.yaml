@@ -1,53 +1,53 @@
 sonarqube:
-# chart-repo: stable/sonarqube
-# chart-version: 4.0.1
-# chart-ingress: true
-# chart-pvc: sonarqube-sonarqube ReadWriteOnce 10Gi
-# chart-pvc: sonarqube-postgresql ReadWriteOnce 8Gi
+  # chart-repo: stable/sonarqube
+  # chart-version: 4.0.1
+  # chart-ingress: true
+  # chart-pvc: sonarqube-sonarqube ReadWriteOnce 10Gi
+  # chart-pvc: sonarqube-postgresql ReadWriteOnce 8Gi
 
-nameOverride: sonarqube
+  nameOverride: sonarqube
 
-service:
-  type: ClusterIP
+  service:
+    type: ClusterIP
 
-ingress:
-  enabled: true
-  annotations:
-    kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/proxy-body-size: 500m
-    ingress.kubernetes.io/proxy-body-size: 500m
-  hosts:
-    - sonarqube-devops.soc1.bespin-mss.com
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/proxy-body-size: 500m
+      ingress.kubernetes.io/proxy-body-size: 500m
+    hosts:
+      - sonarqube-devops.soc1.bespin-mss.com
 
-resources:
-  requests:
-    cpu: 250m
-    memory: 3Gi
-  limits:
-    cpu: 1000m
-    memory: 4Gi
+  resources:
+    requests:
+      cpu: 250m
+      memory: 3Gi
+    limits:
+      cpu: 1000m
+      memory: 4Gi
 
-readinessProbe:
-  initialDelaySeconds: 100
-  periodSeconds: 30
-  failureThreshold: 6
-livenessProbe:
-  initialDelaySeconds: 100
-  periodSeconds: 30
-  failureThreshold: 6
+  readinessProbe:
+    initialDelaySeconds: 100
+    periodSeconds: 30
+    failureThreshold: 6
+  livenessProbe:
+    initialDelaySeconds: 100
+    periodSeconds: 30
+    failureThreshold: 6
 
-persistence:
-  enabled: true
-  accessMode: ReadWriteOnce
-  size: 10Gi
-  storageClass: "efs"
-  existingClaim: sonarqube-sonarqube
-
-postgresql:
   persistence:
     enabled: true
     accessMode: ReadWriteOnce
-    size: 8Gi
+    size: 10Gi
     storageClass: "efs"
-    existingClaim: sonarqube-postgresql
+    existingClaim: sonarqube-sonarqube
+
+  postgresql:
+    persistence:
+      enabled: true
+      accessMode: ReadWriteOnce
+      size: 8Gi
+      storageClass: "efs"
+      existingClaim: sonarqube-postgresql
