@@ -1121,7 +1121,6 @@ jenkins:
   Persistence:
     AccessMode: ReadWriteOnce
     Enabled: true
-    ExistingClaim: jenkins
     Size: 8Gi
     StorageClass: efs
   rbac:
