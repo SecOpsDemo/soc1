@@ -19,7 +19,7 @@ nginx-ingress:
       use-forwarded-headers: "true"
       log-format-escape-json: "true"
       log-format-upstream: '{"timestamp": "$time_iso8601", "cluster": "okc1b", "requestID": "$req_id", "httpRequest": {"timeLocal": "$time_local", "httpReferer": "$http_referer", "requestMethod": "$request_method", "host": "$host", "requestUri": "$request_uri", "status": $status, "requestTime": $request_time, "bodyBytesSent": $body_bytes_sent, "requestSize": $request_length, "proxyUpstreamName": "$proxy_upstream_name", "upstreamStatus": $upstream_status, "upstreamAddr": "$upstream_addr", "upstreamResponseSize": $upstream_response_length, "httpUserAgent": "$http_user_agent","remoteAddr": "$remote_addr", "remoteUser": "$remote_user", "upstreamResponseTime": $upstream_response_time, "serverProtocol": "$server_protocol"}}'
-      client_max_body_size: 0
+      client_max_body_size: '0'
     service:
       annotations:
         service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
