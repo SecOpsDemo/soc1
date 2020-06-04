@@ -20,17 +20,17 @@ jenkins:
         kubernetes.io/ingress.class: nginx
         nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     InstallPlugins:
-    - kubernetes:1.15.10
-    - workflow-job:2.33
-    - workflow-aggregator:2.6
-    - credentials-binding:1.20
-    - blueocean:1.18.1
-    - kubernetes-credentials-provider:0.12.1
-    - pipeline-github-lib:1.0
-    - active-directory:2.12
-    - role-strategy:2.10
-    - ldap:1.20
-    - google-login:1.4
+      - kubernetes: 1.15.10
+      - workflow-job: 2.33
+      - workflow-aggregator: 2.6
+      - credentials-binding: 1.20
+      - blueocean: 1.18.1
+      - kubernetes-credentials-provider: 0.12.1
+      - pipeline-github-lib: 1.0
+      - active-directory: 2.12
+      - role-strategy: 2.10
+      - ldap: 1.20
+      - google-login: 1.4
     JavaOpts: -Dorg.apache.commons.jelly.tags.fmt.timeZone=Asia/Seoul
     Jobs:
       build-command: |-
