@@ -1,0 +1,1129 @@
+# chart-repo: stable/jenkins
+# chart-version: 0.28.10
+# chart-ingress: true
+
+# Need to replace
+# ES_HOST ex. search-seoul-xxxxx-elasticsearch-xxxxxxxxxxxxxxxx.ap-northeast-2.es.amazonaws.com
+# HOSTADDRESS ex. kubernetes-dashboard.mysite.com
+
+# HOSTNAME ex. jenkins-devops.soc1.bespin-mss.com
+# 
+
+jenkins:
+  Master:
+    AdminPassword: password
+    AdminUser: admin
+    HostName: jenkins-devops.soc1.bespin-mss.com
+    ImageTag: 2.176.2
+    Ingress:
+      Annotations:
+        kubernetes.io/ingress.class: nginx
+        nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    InstallPlugins:
+    - kubernetes:1.15.10
+    - workflow-job:2.33
+    - workflow-aggregator:2.6
+    - credentials-binding:1.20
+    - blueocean:1.18.1
+    - kubernetes-credentials-provider:0.12.1
+    - pipeline-github-lib:1.0
+    - active-directory:2.12
+    - role-strategy:2.10
+    - ldap:1.20
+    - google-login:1.4
+    JavaOpts: -Dorg.apache.commons.jelly.tags.fmt.timeZone=Asia/Seoul
+    Jobs:
+      build-command: |-
+        <?xml version='1.0' encoding='UTF-8'?>
+        <flow-definition plugin="workflow-job@2.23">
+        <actions/>
+        <description></description>
+        <keepDependencies>false</keepDependencies>
+        <properties>
+        <hudson.model.ParametersDefinitionProperty>
+        <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+        <name>REPOSITORY_URL</name>
+        <description></description>
+        <defaultValue>https://github.com/nalbam/sample-web.git</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>REPOSITORY_SECRET</name>
+        <description></description>
+        <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>BRANCH_NAME</name>
+        <description></description>
+        <defaultValue>master</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>SERVICE_GROUP</name>
+        <description></description>
+        <defaultValue>sample</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>SERVICE_NAME</name>
+        <description></description>
+        <defaultValue>web</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>COMMAND</name>
+        <description></description>
+        <defaultValue>ls -al</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        </parameterDefinitions>
+        </hudson.model.ParametersDefinitionProperty>
+        <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+        <triggers/>
+        </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+        </properties>
+        <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.54">
+        <script>// build-command
+        @Library(&quot;github.com/opsnow-tools/valve-butler&quot;)
+        def butler = new com.opsnow.valve.v7.Butler()
+        def label = &quot;worker-${UUID.randomUUID().toString()}&quot;
+        def IMAGE_NAME = &quot;${SERVICE_GROUP}-${SERVICE_NAME}&quot;
+        properties([
+          buildDiscarder(logRotator(daysToKeepStr: &quot;60&quot;, numToKeepStr: &quot;30&quot;))
+        ])
+        podTemplate(label: label, containers: [
+          containerTemplate(name: &quot;builder&quot;, image: &quot;opsnowtools/valve-builder:v0.2.2&quot;, command: &quot;cat&quot;, ttyEnabled: true, alwaysPullImage: true)
+        ], volumes: [
+          hostPathVolume(mountPath: &quot;/var/run/docker.sock&quot;, hostPath: &quot;/var/run/docker.sock&quot;),
+          hostPathVolume(mountPath: &quot;/home/jenkins/.helm&quot;, hostPath: &quot;/home/jenkins/.helm&quot;)
+        ]) {
+          node(label) {
+            stage(&quot;Prepare&quot;) {
+              container(&quot;builder&quot;) {
+                butler.prepare(IMAGE_NAME)
+              }
+            }
+            stage(&quot;Checkout&quot;) {
+              container(&quot;builder&quot;) {
+                try {
+                  if (REPOSITORY_SECRET) {
+                    git(url: REPOSITORY_URL, branch: BRANCH_NAME, credentialsId: REPOSITORY_SECRET)
+                  } else {
+                    git(url: REPOSITORY_URL, branch: BRANCH_NAME)
+                  }
+                } catch (e) {
+                  butler.failure(SLACK_TOKEN_DEV, &quot;Checkout&quot;)
+                  throw e
+                }
+                butler.scan()
+              }
+            }
+            stage(&quot;Command&quot;) {
+              container(&quot;builder&quot;) {
+                sh &quot;&quot;&quot;
+                  $COMMAND
+                &quot;&quot;&quot;
+              }
+            }
+          }
+        }
+        </script>
+        <sandbox>true</sandbox>
+        </definition>
+        <triggers/>
+        <disabled>false</disabled>
+        </flow-definition>
+      build-mvn: |-
+        <?xml version='1.0' encoding='UTF-8'?>
+        <flow-definition plugin="workflow-job@2.23">
+        <actions/>
+        <description></description>
+        <keepDependencies>false</keepDependencies>
+        <properties>
+        <hudson.model.ParametersDefinitionProperty>
+        <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+        <name>REPOSITORY_URL</name>
+        <description></description>
+        <defaultValue>https://github.com/nalbam/sample-spring.git</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>REPOSITORY_SECRET</name>
+        <description></description>
+        <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>BRANCH_NAME</name>
+        <description></description>
+        <defaultValue>master</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>SERVICE_GROUP</name>
+        <description></description>
+        <defaultValue>sample</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>SERVICE_NAME</name>
+        <description></description>
+        <defaultValue>spring</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>SLACK_TOKEN</name>
+        <description></description>
+        <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        </parameterDefinitions>
+        </hudson.model.ParametersDefinitionProperty>
+        <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+        <triggers/>
+        </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+        </properties>
+        <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.54">
+        <script>// build-mvn
+        @Library(&quot;github.com/opsnow-tools/valve-butler&quot;)
+        def butler = new com.opsnow.valve.v7.Butler()
+        def label = &quot;worker-${UUID.randomUUID().toString()}&quot;
+        def IMAGE_NAME = &quot;${SERVICE_GROUP}-${SERVICE_NAME}&quot;
+        properties([
+          buildDiscarder(logRotator(daysToKeepStr: &quot;60&quot;, numToKeepStr: &quot;30&quot;))
+        ])
+        podTemplate(label: label, containers: [
+          containerTemplate(name: &quot;builder&quot;, image: &quot;opsnowtools/valve-builder:v0.2.2&quot;, command: &quot;cat&quot;, ttyEnabled: true, alwaysPullImage: true),
+          containerTemplate(name: &quot;maven&quot;, image: &quot;maven:3.5.4-jdk-8-alpine&quot;, command: &quot;cat&quot;, ttyEnabled: true)
+        ], volumes: [
+          hostPathVolume(mountPath: &quot;/var/run/docker.sock&quot;, hostPath: &quot;/var/run/docker.sock&quot;),
+          hostPathVolume(mountPath: &quot;/home/jenkins/.helm&quot;, hostPath: &quot;/home/jenkins/.helm&quot;)
+        ]) {
+          node(label) {
+            stage(&quot;Prepare&quot;) {
+              container(&quot;builder&quot;) {
+                butler.prepare(IMAGE_NAME)
+              }
+            }
+            stage(&quot;Checkout&quot;) {
+              container(&quot;builder&quot;) {
+                try {
+                  if (REPOSITORY_SECRET) {
+                    git(url: REPOSITORY_URL, branch: BRANCH_NAME, credentialsId: REPOSITORY_SECRET)
+                  } else {
+                    git(url: REPOSITORY_URL, branch: BRANCH_NAME)
+                  }
+                } catch (e) {
+                  butler.failure(SLACK_TOKEN, &quot;Checkout&quot;)
+                  throw e
+                }
+                butler.scan(&quot;java&quot;)
+              }
+            }
+            stage(&quot;Build&quot;) {
+              container(&quot;maven&quot;) {
+                try {
+                  butler.mvn_build()
+                  butler.success(SLACK_TOKEN, &quot;Build&quot;)
+                } catch (e) {
+                  butler.failure(SLACK_TOKEN, &quot;Build&quot;)
+                  throw e
+                }
+              }
+            }
+            stage(&quot;Tests&quot;) {
+              container(&quot;maven&quot;) {
+                try {
+                  butler.mvn_test()
+                } catch (e) {
+                  butler.failure(SLACK_TOKEN, &quot;Tests&quot;)
+                  throw e
+                }
+              }
+            }
+            stage(&quot;Code Analysis&quot;) {
+              container(&quot;maven&quot;) {
+                try {
+                  butler.mvn_sonar()
+                } catch (e) {
+                  butler.failure(SLACK_TOKEN_DEV, &quot;Code Analysis&quot;)
+                  throw e
+                }
+              }
+            }
+            stage(&quot;Build Image&quot;) {
+              parallel(
+                &quot;Build Docker&quot;: {
+                  container(&quot;builder&quot;) {
+                    try {
+                      butler.build_image()
+                    } catch (e) {
+                      butler.failure(SLACK_TOKEN, &quot;Build Docker&quot;)
+                      throw e
+                    }
+                  }
+                },
+                &quot;Build Charts&quot;: {
+                  container(&quot;builder&quot;) {
+                    try {
+                      butler.build_chart()
+                    } catch (e) {
+                      butler.failure(SLACK_TOKEN, &quot;Build Charts&quot;)
+                      throw e
+                    }
+                  }
+                }
+              )
+            }
+          }
+        }
+        </script>
+        <sandbox>true</sandbox>
+        </definition>
+        <triggers/>
+        <disabled>false</disabled>
+        </flow-definition>
+      build-npm: |-
+        <?xml version='1.0' encoding='UTF-8'?>
+        <flow-definition plugin="workflow-job@2.23">
+        <actions/>
+        <description></description>
+        <keepDependencies>false</keepDependencies>
+        <properties>
+        <hudson.model.ParametersDefinitionProperty>
+        <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+        <name>REPOSITORY_URL</name>
+        <description></description>
+        <defaultValue>https://github.com/nalbam/sample-node.git</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>REPOSITORY_SECRET</name>
+        <description></description>
+        <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>BRANCH_NAME</name>
+        <description></description>
+        <defaultValue>master</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>SERVICE_GROUP</name>
+        <description></description>
+        <defaultValue>sample</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>SERVICE_NAME</name>
+        <description></description>
+        <defaultValue>node</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>SLACK_TOKEN</name>
+        <description></description>
+        <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        </parameterDefinitions>
+        </hudson.model.ParametersDefinitionProperty>
+        <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+        <triggers/>
+        </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+        </properties>
+        <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.54">
+        <script>// build-npm
+        @Library(&quot;github.com/opsnow-tools/valve-butler&quot;)
+        def butler = new com.opsnow.valve.v7.Butler()
+        def label = &quot;worker-${UUID.randomUUID().toString()}&quot;
+        def IMAGE_NAME = &quot;${SERVICE_GROUP}-${SERVICE_NAME}&quot;
+        properties([
+          buildDiscarder(logRotator(daysToKeepStr: &quot;60&quot;, numToKeepStr: &quot;30&quot;))
+        ])
+        podTemplate(label: label, containers: [
+          containerTemplate(name: &quot;builder&quot;, image: &quot;opsnowtools/valve-builder:v0.2.2&quot;, command: &quot;cat&quot;, ttyEnabled: true, alwaysPullImage: true),
+          containerTemplate(name: &quot;node&quot;, image: &quot;node:10&quot;, command: &quot;cat&quot;, ttyEnabled: true)
+        ], volumes: [
+          hostPathVolume(mountPath: &quot;/var/run/docker.sock&quot;, hostPath: &quot;/var/run/docker.sock&quot;),
+          hostPathVolume(mountPath: &quot;/home/jenkins/.helm&quot;, hostPath: &quot;/home/jenkins/.helm&quot;)
+        ]) {
+          node(label) {
+            stage(&quot;Prepare&quot;) {
+              container(&quot;builder&quot;) {
+                butler.prepare(IMAGE_NAME)
+              }
+            }
+            stage(&quot;Checkout&quot;) {
+              container(&quot;builder&quot;) {
+                try {
+                  if (REPOSITORY_SECRET) {
+                    git(url: REPOSITORY_URL, branch: BRANCH_NAME, credentialsId: REPOSITORY_SECRET)
+                  } else {
+                    git(url: REPOSITORY_URL, branch: BRANCH_NAME)
+                  }
+                } catch (e) {
+                  butler.failure(SLACK_TOKEN, &quot;Checkout&quot;)
+                  throw e
+                }
+                butler.scan(&quot;nodejs&quot;)
+              }
+            }
+            stage(&quot;Build&quot;) {
+              container(&quot;node&quot;) {
+                try {
+                  butler.npm_build()
+                  butler.success(SLACK_TOKEN, &quot;Build&quot;)
+                } catch (e) {
+                  butler.failure(SLACK_TOKEN, &quot;Build&quot;)
+                  throw e
+                }
+              }
+            }
+            stage(&quot;Tests&quot;) {
+              container(&quot;node&quot;) {
+                try {
+                  butler.npm_test()
+                } catch (e) {
+                  butler.failure(SLACK_TOKEN, &quot;Tests&quot;)
+                  throw e
+                }
+              }
+            }
+            stage(&quot;Build Image&quot;) {
+              parallel(
+                &quot;Build Docker&quot;: {
+                  container(&quot;builder&quot;) {
+                    try {
+                      butler.build_image()
+                    } catch (e) {
+                      butler.failure(SLACK_TOKEN, &quot;Build Docker&quot;)
+                      throw e
+                    }
+                  }
+                },
+                &quot;Build Charts&quot;: {
+                  container(&quot;builder&quot;) {
+                    try {
+                      butler.build_chart()
+                    } catch (e) {
+                      butler.failure(SLACK_TOKEN, &quot;Build Charts&quot;)
+                      throw e
+                    }
+                  }
+                }
+              )
+            }
+          }
+        }
+        </script>
+        <sandbox>true</sandbox>
+        </definition>
+        <triggers/>
+        <disabled>false</disabled>
+        </flow-definition>
+      build-web: |-
+        <?xml version='1.0' encoding='UTF-8'?>
+        <flow-definition plugin="workflow-job@2.23">
+        <actions/>
+        <description></description>
+        <keepDependencies>false</keepDependencies>
+        <properties>
+        <hudson.model.ParametersDefinitionProperty>
+        <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+        <name>REPOSITORY_URL</name>
+        <description></description>
+        <defaultValue>https://github.com/nalbam/sample-web.git</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>REPOSITORY_SECRET</name>
+        <description></description>
+        <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>BRANCH_NAME</name>
+        <description></description>
+        <defaultValue>master</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>SERVICE_GROUP</name>
+        <description></description>
+        <defaultValue>sample</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>SERVICE_NAME</name>
+        <description></description>
+        <defaultValue>web</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>SLACK_TOKEN</name>
+        <description></description>
+        <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        </parameterDefinitions>
+        </hudson.model.ParametersDefinitionProperty>
+        <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+        <triggers/>
+        </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+        </properties>
+        <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.54">
+        <script>// build-web
+        @Library(&quot;github.com/opsnow-tools/valve-butler&quot;)
+        def butler = new com.opsnow.valve.v7.Butler()
+        def label = &quot;worker-${UUID.randomUUID().toString()}&quot;
+        def IMAGE_NAME = &quot;${SERVICE_GROUP}-${SERVICE_NAME}&quot;
+        properties([
+          buildDiscarder(logRotator(daysToKeepStr: &quot;60&quot;, numToKeepStr: &quot;30&quot;))
+        ])
+        podTemplate(label: label, containers: [
+          containerTemplate(name: &quot;builder&quot;, image: &quot;opsnowtools/valve-builder:v0.2.2&quot;, command: &quot;cat&quot;, ttyEnabled: true, alwaysPullImage: true)
+        ], volumes: [
+          hostPathVolume(mountPath: &quot;/var/run/docker.sock&quot;, hostPath: &quot;/var/run/docker.sock&quot;),
+          hostPathVolume(mountPath: &quot;/home/jenkins/.helm&quot;, hostPath: &quot;/home/jenkins/.helm&quot;)
+        ]) {
+          node(label) {
+            stage(&quot;Prepare&quot;) {
+              container(&quot;builder&quot;) {
+                butler.prepare(IMAGE_NAME)
+              }
+            }
+            stage(&quot;Checkout&quot;) {
+              container(&quot;builder&quot;) {
+                try {
+                  if (REPOSITORY_SECRET) {
+                    git(url: REPOSITORY_URL, branch: BRANCH_NAME, credentialsId: REPOSITORY_SECRET)
+                  } else {
+                    git(url: REPOSITORY_URL, branch: BRANCH_NAME)
+                  }
+                } catch (e) {
+                  butler.failure(SLACK_TOKEN, &quot;Checkout&quot;)
+                  throw e
+                }
+              }
+            }
+            stage(&quot;Build Image&quot;) {
+              parallel(
+                &quot;Build Docker&quot;: {
+                  container(&quot;builder&quot;) {
+                    try {
+                      butler.build_image()
+                    } catch (e) {
+                      butler.failure(SLACK_TOKEN, &quot;Build Docker&quot;)
+                      throw e
+                    }
+                  }
+                },
+                &quot;Build Charts&quot;: {
+                  container(&quot;builder&quot;) {
+                    try {
+                      butler.build_chart()
+                    } catch (e) {
+                      butler.failure(SLACK_TOKEN, &quot;Build Charts&quot;)
+                      throw e
+                    }
+                  }
+                }
+              )
+            }
+          }
+        }
+        </script>
+        <sandbox>true</sandbox>
+        </definition>
+        <triggers/>
+        <disabled>false</disabled>
+        </flow-definition>
+      config-apply: |-
+        <?xml version='1.0' encoding='UTF-8'?>
+        <flow-definition plugin="workflow-job@2.23">
+        <actions/>
+        <description></description>
+        <keepDependencies>false</keepDependencies>
+        <properties>
+        <hudson.model.ParametersDefinitionProperty>
+        <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+        <name>REPOSITORY_URL</name>
+        <description></description>
+        <defaultValue>https://github.com/nalbam/sample-config.git</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>REPOSITORY_SECRET</name>
+        <description></description>
+        <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>BRANCH_NAME</name>
+        <description></description>
+        <defaultValue>master</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>CLUSTER</name>
+        <description></description>
+        <defaultValue>dev</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>NAMESPACE</name>
+        <description></description>
+        <defaultValue>dev</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>SERVICE_GROUP</name>
+        <description></description>
+        <defaultValue>sample</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>SERVICE_NAME</name>
+        <description></description>
+        <defaultValue>config</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>CONFIG_TYPE</name>
+        <description></description>
+        <defaultValue>secret</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>YAML_PATH</name>
+        <description></description>
+        <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>SLACK_TOKEN</name>
+        <description></description>
+        <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        </parameterDefinitions>
+        </hudson.model.ParametersDefinitionProperty>
+        <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+        <triggers/>
+        </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+        </properties>
+        <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.54">
+        <script>// config-apply
+        @Library(&quot;github.com/opsnow-tools/valve-butler&quot;)
+        def butler = new com.opsnow.valve.v7.Butler()
+        def label = &quot;worker-${UUID.randomUUID().toString()}&quot;
+        def IMAGE_NAME = &quot;${SERVICE_GROUP}-${SERVICE_NAME}&quot;
+        properties([
+          buildDiscarder(logRotator(daysToKeepStr: &quot;60&quot;, numToKeepStr: &quot;30&quot;))
+        ])
+        podTemplate(label: label, containers: [
+          containerTemplate(name: &quot;builder&quot;, image: &quot;opsnowtools/valve-builder:v0.2.2&quot;, command: &quot;cat&quot;, ttyEnabled: true, alwaysPullImage: true)
+        ], volumes: [
+          hostPathVolume(mountPath: &quot;/var/run/docker.sock&quot;, hostPath: &quot;/var/run/docker.sock&quot;),
+          hostPathVolume(mountPath: &quot;/home/jenkins/.helm&quot;, hostPath: &quot;/home/jenkins/.helm&quot;)
+        ]) {
+          node(label) {
+            stage(&quot;Prepare&quot;) {
+              container(&quot;builder&quot;) {
+                butler.prepare(IMAGE_NAME)
+              }
+            }
+            stage(&quot;Checkout&quot;) {
+              container(&quot;builder&quot;) {
+                try {
+                  if (REPOSITORY_SECRET) {
+                    git(url: REPOSITORY_URL, branch: BRANCH_NAME, credentialsId: REPOSITORY_SECRET)
+                  } else {
+                    git(url: REPOSITORY_URL, branch: BRANCH_NAME)
+                  }
+                } catch (e) {
+                  butler.failure(SLACK_TOKEN, &quot;Checkout&quot;)
+                  throw e
+                }
+              }
+            }
+            stage(&quot;Apply&quot;) {
+              container(&quot;builder&quot;) {
+                try {
+                  // apply(cluster, namespace, type, yaml)
+                  butler.apply(CLUSTER, NAMESPACE, CONFIG_TYPE, YAML_PATH)
+                  butler.success(SLACK_TOKEN, &quot;Apply&quot;)
+                } catch (e) {
+                  butler.failure(SLACK_TOKEN, &quot;Apply&quot;)
+                  throw e
+                }
+              }
+            }
+          }
+        }
+        </script>
+        <sandbox>true</sandbox>
+        </definition>
+        <triggers/>
+        <disabled>false</disabled>
+        </flow-definition>
+      image-deploy: |-
+        <?xml version='1.0' encoding='UTF-8'?>
+        <flow-definition plugin="workflow-job@2.23">
+        <actions/>
+        <description></description>
+        <keepDependencies>false</keepDependencies>
+        <properties>
+        <hudson.model.ParametersDefinitionProperty>
+        <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+        <name>CLUSTER</name>
+        <description></description>
+        <defaultValue>dev</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>NAMESPACE</name>
+        <description></description>
+        <defaultValue>stage</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>SERVICE_GROUP</name>
+        <description></description>
+        <defaultValue>sample</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>SERVICE_NAME</name>
+        <description></description>
+        <defaultValue>node</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>VERSION</name>
+        <description></description>
+        <defaultValue>latest</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>SUB_DOMAIN</name>
+        <description></description>
+        <defaultValue>sample-node-stage</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>PROFILE</name>
+        <description></description>
+        <defaultValue>stage</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>SLACK_TOKEN</name>
+        <description></description>
+        <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        </parameterDefinitions>
+        </hudson.model.ParametersDefinitionProperty>
+        <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+        <triggers/>
+        </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+        </properties>
+        <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.54">
+        <script>// image-deploy
+        @Library(&quot;github.com/opsnow-tools/valve-butler&quot;)
+        def butler = new com.opsnow.valve.v7.Butler()
+        def label = &quot;worker-${UUID.randomUUID().toString()}&quot;
+        def IMAGE_NAME = &quot;${SERVICE_GROUP}-${SERVICE_NAME}&quot;
+        properties([
+          buildDiscarder(logRotator(daysToKeepStr: &quot;60&quot;, numToKeepStr: &quot;30&quot;))
+        ])
+        podTemplate(label: label, containers: [
+          containerTemplate(name: &quot;builder&quot;, image: &quot;opsnowtools/valve-builder:v0.2.2&quot;, command: &quot;cat&quot;, ttyEnabled: true, alwaysPullImage: true)
+        ], volumes: [
+          hostPathVolume(mountPath: &quot;/var/run/docker.sock&quot;, hostPath: &quot;/var/run/docker.sock&quot;),
+          hostPathVolume(mountPath: &quot;/home/jenkins/.helm&quot;, hostPath: &quot;/home/jenkins/.helm&quot;)
+        ]) {
+          node(label) {
+            stage(&quot;Prepare&quot;) {
+              container(&quot;builder&quot;) {
+                butler.prepare(IMAGE_NAME, VERSION)
+              }
+            }
+            stage(&quot;Deploy&quot;) {
+              container(&quot;builder&quot;) {
+                try {
+                  // deploy(cluster, namespace, sub_domain, profile)
+                  butler.deploy(CLUSTER, NAMESPACE, SUB_DOMAIN, PROFILE)
+                  butler.success(SLACK_TOKEN, &quot;Deploy&quot;)
+                } catch (e) {
+                  butler.failure(SLACK_TOKEN, &quot;Deploy&quot;)
+                  throw e
+                }
+              }
+            }
+          }
+        }
+        </script>
+        <sandbox>true</sandbox>
+        </definition>
+        <triggers/>
+        <disabled>false</disabled>
+        </flow-definition>
+      image-remove: |-
+        <?xml version='1.0' encoding='UTF-8'?>
+        <flow-definition plugin="workflow-job@2.23">
+        <actions/>
+        <description></description>
+        <keepDependencies>false</keepDependencies>
+        <properties>
+        <hudson.model.ParametersDefinitionProperty>
+        <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+        <name>CLUSTER</name>
+        <description></description>
+        <defaultValue>dev</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>NAMESPACE</name>
+        <description></description>
+        <defaultValue>prod</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>SERVICE_GROUP</name>
+        <description></description>
+        <defaultValue>sample</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>SERVICE_NAME</name>
+        <description></description>
+        <defaultValue>node</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>SLACK_TOKEN</name>
+        <description></description>
+        <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        </parameterDefinitions>
+        </hudson.model.ParametersDefinitionProperty>
+        <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+        <triggers/>
+        </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+        </properties>
+        <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.54">
+        <script>// image-remove
+        @Library(&quot;github.com/opsnow-tools/valve-butler&quot;)
+        def butler = new com.opsnow.valve.v7.Butler()
+        def label = &quot;worker-${UUID.randomUUID().toString()}&quot;
+        def IMAGE_NAME = &quot;${SERVICE_GROUP}-${SERVICE_NAME}&quot;
+        properties([
+          buildDiscarder(logRotator(daysToKeepStr: &quot;60&quot;, numToKeepStr: &quot;30&quot;))
+        ])
+        podTemplate(label: label, containers: [
+          containerTemplate(name: &quot;builder&quot;, image: &quot;opsnowtools/valve-builder:v0.2.2&quot;, command: &quot;cat&quot;, ttyEnabled: true, alwaysPullImage: true)
+        ], volumes: [
+          hostPathVolume(mountPath: &quot;/var/run/docker.sock&quot;, hostPath: &quot;/var/run/docker.sock&quot;),
+          hostPathVolume(mountPath: &quot;/home/jenkins/.helm&quot;, hostPath: &quot;/home/jenkins/.helm&quot;)
+        ]) {
+          node(label) {
+            stage(&quot;Prepare&quot;) {
+              container(&quot;builder&quot;) {
+                butler.prepare(IMAGE_NAME)
+              }
+            }
+            stage(&quot;Remove&quot;) {
+              container(&quot;builder&quot;) {
+                try {
+                  // remove(cluster, namespace)
+                  butler.remove(CLUSTER, NAMESPACE)
+                  butler.success(SLACK_TOKEN, &quot;Remove&quot;)
+                } catch (e) {
+                  butler.failure(SLACK_TOKEN, &quot;Remove&quot;)
+                  throw e
+                }
+              }
+            }
+          }
+        }
+        </script>
+        <sandbox>true</sandbox>
+        </definition>
+        <triggers/>
+        <disabled>false</disabled>
+        </flow-definition>
+      image-rollback: |-
+        <?xml version='1.0' encoding='UTF-8'?>
+        <flow-definition plugin="workflow-job@2.23">
+        <actions/>
+        <description></description>
+        <keepDependencies>false</keepDependencies>
+        <properties>
+        <hudson.model.ParametersDefinitionProperty>
+        <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+        <name>CLUSTER</name>
+        <description></description>
+        <defaultValue>dev</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>NAMESPACE</name>
+        <description></description>
+        <defaultValue>prod</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>SERVICE_GROUP</name>
+        <description></description>
+        <defaultValue>sample</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>SERVICE_NAME</name>
+        <description></description>
+        <defaultValue>node</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>REVISION</name>
+        <description></description>
+        <defaultValue>0</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>SLACK_TOKEN</name>
+        <description></description>
+        <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        </parameterDefinitions>
+        </hudson.model.ParametersDefinitionProperty>
+        <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+        <triggers/>
+        </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+        </properties>
+        <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.54">
+        <script>// image-rollback
+        @Library(&quot;github.com/opsnow-tools/valve-butler&quot;)
+        def butler = new com.opsnow.valve.v7.Butler()
+        def label = &quot;worker-${UUID.randomUUID().toString()}&quot;
+        def IMAGE_NAME = &quot;${SERVICE_GROUP}-${SERVICE_NAME}&quot;
+        properties([
+          buildDiscarder(logRotator(daysToKeepStr: &quot;60&quot;, numToKeepStr: &quot;30&quot;))
+        ])
+        podTemplate(label: label, containers: [
+          containerTemplate(name: &quot;builder&quot;, image: &quot;opsnowtools/valve-builder:v0.2.2&quot;, command: &quot;cat&quot;, ttyEnabled: true, alwaysPullImage: true)
+        ], volumes: [
+          hostPathVolume(mountPath: &quot;/var/run/docker.sock&quot;, hostPath: &quot;/var/run/docker.sock&quot;),
+          hostPathVolume(mountPath: &quot;/home/jenkins/.helm&quot;, hostPath: &quot;/home/jenkins/.helm&quot;)
+        ]) {
+          node(label) {
+            stage(&quot;Prepare&quot;) {
+              container(&quot;builder&quot;) {
+                butler.prepare(IMAGE_NAME)
+              }
+            }
+            stage(&quot;Rollback&quot;) {
+              container(&quot;builder&quot;) {
+                try {
+                  // rollback(cluster, namespace)
+                  butler.rollback(CLUSTER, NAMESPACE, REVISION)
+                  butler.success(SLACK_TOKEN, &quot;Rollback&quot;)
+                } catch (e) {
+                  butler.failure(SLACK_TOKEN, &quot;Rollback&quot;)
+                  throw e
+                }
+              }
+            }
+          }
+        }
+        </script>
+        <sandbox>true</sandbox>
+        </definition>
+        <triggers/>
+        <disabled>false</disabled>
+        </flow-definition>
+      run-command: |-
+        <?xml version='1.0' encoding='UTF-8'?>
+        <flow-definition plugin="workflow-job@2.23">
+        <actions/>
+        <description></description>
+        <keepDependencies>false</keepDependencies>
+        <properties>
+        <hudson.model.ParametersDefinitionProperty>
+        <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+        <name>CLUSTER</name>
+        <description></description>
+        <defaultValue>dev</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>COMMAND</name>
+        <description></description>
+        <defaultValue>kubectl get all --all-namespaces</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        </parameterDefinitions>
+        </hudson.model.ParametersDefinitionProperty>
+        <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+        <triggers/>
+        </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+        </properties>
+        <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.54">
+        <script>// run-command
+        def label = &quot;worker-${UUID.randomUUID().toString()}&quot;
+        properties([
+          buildDiscarder(logRotator(daysToKeepStr: &quot;60&quot;, numToKeepStr: &quot;30&quot;))
+        ])
+        podTemplate(label: label, containers: [
+          containerTemplate(name: &quot;builder&quot;, image: &quot;opsnowtools/valve-builder:v0.2.2&quot;, command: &quot;cat&quot;, ttyEnabled: true, alwaysPullImage: true)
+        ], volumes: [
+          hostPathVolume(mountPath: &quot;/var/run/docker.sock&quot;, hostPath: &quot;/var/run/docker.sock&quot;),
+          hostPathVolume(mountPath: &quot;/home/jenkins/.helm&quot;, hostPath: &quot;/home/jenkins/.helm&quot;)
+        ]) {
+          node(label) {
+            stage(&quot;Command&quot;) {
+              container(&quot;builder&quot;) {
+                sh &quot;&quot;&quot;
+                  rm -rf ${home}/.aws && mkdir -p ${home}/.aws
+                  rm -rf ${home}/.kube && mkdir -p ${home}/.kube
+
+                  kubectl get secret kube-config-${CLUSTER} -n devops -o json | jq -r .data.aws | base64 -d &gt; ${home}/aws_config
+                  kubectl get secret kube-config-${CLUSTER} -n devops -o json | jq -r .data.text | base64 -d &gt; ${home}/kube_config
+                  cp ${home}/aws_config ${home}/.aws/config && \
+                  cp ${home}/kube_config ${home}/.kube/config
+
+                  kubectl config current-context
+
+                  $COMMAND
+                &quot;&quot;&quot;
+              }
+            }
+          }
+        }
+        </script>
+        <sandbox>true</sandbox>
+        </definition>
+        <triggers/>
+        <disabled>false</disabled>
+        </flow-definition>
+      run-pipeline: |-
+        <?xml version='1.0' encoding='UTF-8'?>
+        <flow-definition plugin="workflow-job@2.23">
+        <actions/>
+        <description></description>
+        <keepDependencies>false</keepDependencies>
+        <properties>
+        <hudson.model.ParametersDefinitionProperty>
+        <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+        <name>REPOSITORY_URL</name>
+        <description></description>
+        <defaultValue>https://github.com/nalbam/sample-spring.git</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>REPOSITORY_SECRET</name>
+        <description></description>
+        <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>BRANCH_NAME</name>
+        <description></description>
+        <defaultValue>master</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>SERVICE_GROUP</name>
+        <description></description>
+        <defaultValue>sample</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+        <name>SERVICE_NAME</name>
+        <description></description>
+        <defaultValue>spring</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        </parameterDefinitions>
+        </hudson.model.ParametersDefinitionProperty>
+        <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+        <triggers/>
+        </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+        </properties>
+        <definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" plugin="workflow-cps@2.54">
+        <scm class="hudson.plugins.git.GitSCM" plugin="git@3.9.1">
+        <configVersion>2</configVersion>
+        <userRemoteConfigs>
+        <hudson.plugins.git.UserRemoteConfig>
+        <url>$REPOSITORY_URL</url>
+        </hudson.plugins.git.UserRemoteConfig>
+        </userRemoteConfigs>
+        <branches>
+        <hudson.plugins.git.BranchSpec>
+        <name>$BRANCH_NAME</name>
+        </hudson.plugins.git.BranchSpec>
+        </branches>
+        <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+        <submoduleCfg class="list"/>
+        <extensions/>
+        </scm>
+        <scriptPath>Jenkinsfile</scriptPath>
+        <lightweight>false</lightweight>
+        </definition>
+        <triggers/>
+        <disabled>false</disabled>
+        </flow-definition>
+      sample: |-
+        <?xml version='1.0' encoding='UTF-8'?>
+        <flow-definition plugin="workflow-job@2.23">
+        <actions/>
+        <description></description>
+        <keepDependencies>false</keepDependencies>
+        <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.54">
+        <script>// sample
+        @Library(&quot;github.com/opsnow-tools/valve-butler&quot;)
+        def butler = new com.opsnow.valve.v7.Butler()
+        def label = &quot;worker-${UUID.randomUUID().toString()}&quot;
+        properties([
+          buildDiscarder(logRotator(daysToKeepStr: &quot;60&quot;, numToKeepStr: &quot;30&quot;))
+        ])
+        podTemplate(label: label, containers: [
+          containerTemplate(name: &quot;builder&quot;, image: &quot;opsnowtools/valve-builder:v0.2.2&quot;, command: &quot;cat&quot;, ttyEnabled: true, alwaysPullImage: true)
+        ], volumes: [
+          hostPathVolume(mountPath: &quot;/var/run/docker.sock&quot;, hostPath: &quot;/var/run/docker.sock&quot;),
+          hostPathVolume(mountPath: &quot;/home/jenkins/.helm&quot;, hostPath: &quot;/home/jenkins/.helm&quot;)
+        ]) {
+          node(label) {
+            stage(&quot;Info&quot;) {
+              sh &quot;&quot;&quot;
+                pwd
+                date
+                whoami
+                uname -a
+                echo $JOB_NAME
+                echo $BUILD_NUMBER
+              &quot;&quot;&quot;
+            }
+            stage(&quot;Prepare&quot;) {
+              container(&quot;builder&quot;) {
+                sh &quot;&quot;&quot;
+                  pwd
+                  date
+                  whoami
+                  uname -a
+                &quot;&quot;&quot;
+                butler.prepare()
+              }
+            }
+            stage(&quot;Run docker&quot;) {
+              container(&quot;builder&quot;) {
+                sh &quot;&quot;&quot;
+                  docker version
+                  docker images
+                  docker ps
+                &quot;&quot;&quot;
+              }
+            }
+            stage(&quot;Run kubectl&quot;) {
+              container(&quot;builder&quot;) {
+                sh &quot;&quot;&quot;
+                  kubectl version
+                  kubectl cluster-info
+                  kubectl get pod,svc,ing
+                &quot;&quot;&quot;
+              }
+            }
+            stage(&quot;Run helm&quot;) {
+              container(&quot;builder&quot;) {
+                butler.helm_init()
+              }
+            }
+            stage(&quot;End&quot;) {
+              container(&quot;builder&quot;) {
+                sh &quot;&quot;&quot;
+                  ls -al
+                &quot;&quot;&quot;
+              }
+            }
+          }
+        }
+        </script>
+        <sandbox>true</sandbox>
+        </definition>
+        <triggers/>
+        <disabled>false</disabled>
+        </flow-definition>
+    ServiceType: ClusterIP
+    resources:
+      limits:
+        cpu: 1200m
+        memory: 2400Mi
+      requests:
+        cpu: 1
+        memory: 2Gi
+  Persistence:
+    AccessMode: ReadWriteOnce
+    Enabled: true
+    ExistingClaim: jenkins
+    Size: 8Gi
+    StorageClass: efs
+  rbac:
+    install: true
+
