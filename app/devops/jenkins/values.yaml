@@ -1110,7 +1110,7 @@ jenkins:
         <triggers/>
         <disabled>false</disabled>
         </flow-definition>
-    ServiceType: ClusterIP
+    ServiceType: LoadBalancer
     resources:
       limits:
         cpu: 2
