@@ -1123,6 +1123,7 @@ jenkins:
     Enabled: true
     Size: 8Gi
     StorageClass: efs
+    ExistingClaim: jenkins
   rbac:
     install: true
 
