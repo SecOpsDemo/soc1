@@ -114,6 +114,14 @@ module "eks-compute" {
       # 쿠버네티스 RBAC 그룹, 기본값이므로 그냥 사용.
       group    = "system:masters"
     },
+    {
+      # AWS IAM Role, 사전에 생성되어 있어야 함. AdministratorAccess 정책이 맵핑되어 있어야 함.
+      rolearn  = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/changyu.seon"
+      # 쿠버네티스 RBAC 사용자이름, 기본값이므로 그냥 사용.
+      username = "iam_role_admin"
+      # 쿠버네티스 RBAC 그룹, 기본값이므로 그냥 사용.
+      group    = "system:masters"
+    },
   ]
   map_users = "${var.map_users}"
   worker_sg_id = "${module.eks-sg-node.sg_id}"
