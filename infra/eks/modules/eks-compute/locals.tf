@@ -44,6 +44,8 @@ locals {
 sudo touch /etc/security/limits.d/limit.conf
 sudo echo "*   hard  nofile  65535" | sudo tee --append /etc/security/limits.d/limit.conf
 sudo echo "*   soft  nofile  65535" | sudo tee --append /etc/security/limits.d/limit.conf
+
+sudo chmod 777 /var/run/docker.socket 
 EOF
 }
 
