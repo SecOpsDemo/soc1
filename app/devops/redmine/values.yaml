@@ -191,58 +191,58 @@ redmine:
     accessMode: ReadWriteOnce
     size: 8Gi
 
-## Database type. Allowed values: "mariadb" and "postgresql"
-## ref: https://github.com/bitnami/bitnami-docker-redmine#run-the-application-using-postgresql-database
-##
-databaseType: mariadb
-
-## MariaDB chart configuration
-##
-## https://github.com/bitnami/charts/blob/master/bitnami/mariadb/values.yaml
-##
-mariadb:
-  ## Whether to deploy a mariadb server to satisfy the applications database requirements. To use an external database set this to false and configure the externalDatabase parameters
-  enabled: true
-  ## Disable MariaDB replication
-  replication:
-    enabled: false
-
-  ## Use existing secret (ignores root, db and replication passwords)
+  ## Database type. Allowed values: "mariadb" and "postgresql"
+  ## ref: https://github.com/bitnami/bitnami-docker-redmine#run-the-application-using-postgresql-database
   ##
-  # existingSecret:
+  databaseType: mariadb
 
-  ## Create a database and a database user
-  ## ref: https://github.com/bitnami/bitnami-docker-mariadb/blob/master/README.md#creating-a-database-user-on-first-run
+  ## MariaDB chart configuration
   ##
-  db:
-    name: bitnami_redmine
-    user: bn_redmine
-    ## If the password is not specified, mariadb will generate a random password
+  ## https://github.com/bitnami/charts/blob/master/bitnami/mariadb/values.yaml
+  ##
+  mariadb:
+    ## Whether to deploy a mariadb server to satisfy the applications database requirements. To use an external database set this to false and configure the externalDatabase parameters
+    enabled: true
+    ## Disable MariaDB replication
+    replication:
+      enabled: false
+
+    ## Use existing secret (ignores root, db and replication passwords)
     ##
-    # password:
+    # existingSecret:
 
-  ## MariaDB admin password
-  ## ref: https://github.com/bitnami/bitnami-docker-mariadb/blob/master/README.md#setting-the-root-password-on-first-run
-  ##
-  # rootUser:
-  #   password:
-
-  ## Enable persistence using Persistent Volume Claims
-  ## ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
-  ##
-  master:
-    persistence:
-      enabled: true
-      ## mariadb data Persistent Volume Storage Class
-      ## If defined, storageClassName: <storageClass>
-      ## If set to "-", storageClassName: "", which disables dynamic provisioning
-      ## If undefined (the default) or set to null, no storageClassName spec is
-      ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
-      ##   GKE, AWS & OpenStack)
+    ## Create a database and a database user
+    ## ref: https://github.com/bitnami/bitnami-docker-mariadb/blob/master/README.md#creating-a-database-user-on-first-run
+    ##
+    db:
+      name: bitnami_redmine
+      user: bn_redmine
+      ## If the password is not specified, mariadb will generate a random password
       ##
-      storageClass: efs
-      accessMode: ReadWriteOnce
-      size: 8Gi
+      # password:
+
+    ## MariaDB admin password
+    ## ref: https://github.com/bitnami/bitnami-docker-mariadb/blob/master/README.md#setting-the-root-password-on-first-run
+    ##
+    # rootUser:
+    #   password:
+
+    ## Enable persistence using Persistent Volume Claims
+    ## ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
+    ##
+    master:
+      persistence:
+        enabled: true
+        ## mariadb data Persistent Volume Storage Class
+        ## If defined, storageClassName: <storageClass>
+        ## If set to "-", storageClassName: "", which disables dynamic provisioning
+        ## If undefined (the default) or set to null, no storageClassName spec is
+        ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+        ##   GKE, AWS & OpenStack)
+        ##
+        storageClass: efs
+        accessMode: ReadWriteOnce
+        size: 8Gi
 
   ## All of these values are only used when:
   ## a) mariadb.enabled is set to false and databaseType=mariadb
