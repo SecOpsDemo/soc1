@@ -191,43 +191,49 @@ redmine:
     accessMode: ReadWriteOnce
     size: 8Gi
 
-  ## Database type. Allowed values: "mariadb" and "postgresql"
-  ## ref: https://github.com/bitnami/bitnami-docker-redmine#run-the-application-using-postgresql-database
-  ##
-  databaseType: postgresql
+## Database type. Allowed values: "mariadb" and "postgresql"
+## ref: https://github.com/bitnami/bitnami-docker-redmine#run-the-application-using-postgresql-database
+##
+databaseType: mariadb
 
-  mariadb:
-    ## Whether to deploy a mariadb server to satisfy the applications database requirements. To use an external database set this to false and configure the externalDatabase parameters
+## MariaDB chart configuration
+##
+## https://github.com/bitnami/charts/blob/master/bitnami/mariadb/values.yaml
+##
+mariadb:
+  ## Whether to deploy a mariadb server to satisfy the applications database requirements. To use an external database set this to false and configure the externalDatabase parameters
+  enabled: true
+  ## Disable MariaDB replication
+  replication:
     enabled: false
 
-  ## PostgreSQL chart configuration
+  ## Use existing secret (ignores root, db and replication passwords)
   ##
-  ## https://github.com/bitnami/charts/blob/master/bitnami/postgresql/values.yaml
+  # existingSecret:
+
+  ## Create a database and a database user
+  ## ref: https://github.com/bitnami/bitnami-docker-mariadb/blob/master/README.md#creating-a-database-user-on-first-run
   ##
-  postgresql:
-    ## Whether to deploy a PostgreSQL server to satisfy the applications database requirements. To use an external database set this to false and configure the externalDatabase parameters
-    enabled: true
+  db:
+    name: bitnami_redmine
+    user: bn_redmine
+    ## If the password is not specified, mariadb will generate a random password
+    ##
+    # password:
 
-    ## Create a database and a database user
-    ## ref: https://github.com/bitnami/bitnami-docker-postgresql/#creating-a-database-on-first-run
-    ##
-    postgresqlDatabase: secops_redmine
-    postgresqlUsername: so_redmine
-    ##
-    ## If the password is not specified, postgresql will generate a random password
-    # postgresqlPassword:
+  ## MariaDB admin password
+  ## ref: https://github.com/bitnami/bitnami-docker-mariadb/blob/master/README.md#setting-the-root-password-on-first-run
+  ##
+  # rootUser:
+  #   password:
 
-    ## Enable persistence using Persistent Volume Claims
-    ## ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
-    ##
+  ## Enable persistence using Persistent Volume Claims
+  ## ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
+  ##
+  master:
     persistence:
       enabled: true
-      ## A manually manage Persistent Volume Claim
-      ## Requires postgresql.persistence.enable: true
-      ## If defined, PVC must be created manually before volume will be bound
-      existingClaim: postgresql
-
-      ## postgresql data Persistent Volume Storage Class
+      ## mariadb data Persistent Volume Storage Class
       ## If defined, storageClassName: <storageClass>
       ## If set to "-", storageClassName: "", which disables dynamic provisioning
       ## If undefined (the default) or set to null, no storageClassName spec is
