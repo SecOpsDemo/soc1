@@ -208,25 +208,6 @@ redmine:
       accessMode: ReadWriteOnce
       size: 8Gi
 
-  ## All of these values are only used when:
-  ## a) mariadb.enabled is set to false and databaseType=mariadb
-  ## b) postgresql.enabled is set to false and databaseType=postgresql
-  externalDatabase:
-    ## Database host
-    host: localhost
-
-    ## Database name
-    name: database
-
-    ## Database User
-    user: user
-
-    ## Database Password
-    password: ""
-
-    ## Database port number (use 5432 when using PostgreSQL)
-    port: 5432
-
   ## Kubernetes configuration
   ##   minikube: NodePort
   ##   ingress: ClusterIP
@@ -238,13 +219,13 @@ redmine:
     port: 80
     ## loadBalancerIP:
     ## Control hosts connecting to "LoadBalancer" only
-    loadBalancerSourceRanges:
-      - 0.0.0.0/0
+    # loadBalancerSourceRanges:
+    #   - 0.0.0.0/0
     ##
     ## nodePorts:
     ##   http: <to set explicitly, choose port between 30000-32767>
-    nodePorts:
-      http: ""
+    # nodePorts:
+    #   http: ""
     ## Enable client source IP preservation
     ## ref http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
     ##
