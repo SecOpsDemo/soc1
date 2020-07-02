@@ -196,6 +196,10 @@ redmine:
   ##
   databaseType: postgresql
 
+  mariadb:
+    ## Whether to deploy a mariadb server to satisfy the applications database requirements. To use an external database set this to false and configure the externalDatabase parameters
+    enabled: false
+
   ## PostgreSQL chart configuration
   ##
   ## https://github.com/bitnami/charts/blob/master/bitnami/postgresql/values.yaml
