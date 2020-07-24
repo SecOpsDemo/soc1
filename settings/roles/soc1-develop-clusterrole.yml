@@ -1,0 +1,27 @@
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: soc1:develop
+rules:
+- apiGroups: ["", "apps", "extensions", "batch", "storage.k8s.io"]
+  resources: [
+    "namespaces",
+    "daemonsets",
+    "statefulsets",
+    "deployments",
+    "replicasets",
+    "replicationcontrollers",
+    "pods",
+    "pods/log",
+    "persistentvolumes",
+    "persistentvolumeclaims",
+    "services",
+    "ingresses",
+    "endpoints",
+    "configmaps",
+    "jobs",
+    "cronjobs",
+    "events",
+    "storageclasses"
+    ]
+  verbs: ["get", "watch", "list"]
