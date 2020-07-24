@@ -10,7 +10,7 @@ roleRef:
 subjects:
 - apiGroup: rbac.authorization.k8s.io
   kind: User
-  name: alice.kim
+  name: john.kim
 - apiGroup: rbac.authorization.k8s.io
   kind: User
   name: bob.choi
