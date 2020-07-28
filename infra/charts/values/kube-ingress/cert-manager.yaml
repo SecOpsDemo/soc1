@@ -1,0 +1,15 @@
+nameOverride: cert-manager
+
+installCRDs: true
+
+ingressShim:
+  defaultIssuerName: letsencrypt-issuer
+  defaultIssuerKind: ClusterIssuer
+
+# prometheus:
+#   enabled: true
+#   servicemonitor:
+#     enabled: true
+#     prometheusInstance: default
+#     labels:
+#       release: prometheus-operator

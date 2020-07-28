@@ -1,0 +1,8 @@
+{
+  "variable": {
+    "certmanager_version": {
+      "default": "v0.12.0",
+      "description": "certmanager_version"
+    }
+  }
+}
