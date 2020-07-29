@@ -3,7 +3,7 @@ resource "helm_release" "harbor" {
   chart      = "harbor"
   version    = var.harbor_version
 
-  namespace = "devoops"
+  namespace = "devops"
   name      = "harbor"
 
   values = [

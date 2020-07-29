@@ -8,8 +8,8 @@ expose:
     notarySecretName: "harbor-notary-tls"
   ingress:
     hosts:
-      core: "harbor-core.soc1.bespin-mss.com"
-      notary: "harbor-notary.soc1.bespin-mss.como"
+      core: "harbor.soc1.bespin-mss.com"
+      notary: "harbor-notary.soc1.bespin-mss.com"
     annotations:
       cert-manager.io/cluster-issuer: "letsencrypt-issuer"
       ingress.kubernetes.io/proxy-body-size: "0"
@@ -19,7 +19,7 @@ expose:
       nginx.ingress.kubernetes.io/ssl-redirect: "true"
       nginx.ingress.kubernetes.io/whitelist-source-range: "0.0.0.0/0"
 
-externalURL: "https://harbor-core.soc1.bespin-mss.com"
+externalURL: "https://harbor.soc1.bespin-mss.com"
 
 harborAdminPassword: "password"
 
