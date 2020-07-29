@@ -1,5 +1,5 @@
 resource "helm_release" "harbor" {
-  repository = "https://charts.bitnami.com/bitnami"
+  repository = "https://helm.goharbor.io"
   chart      = "harbor"
   version    = var.harbor_version
 

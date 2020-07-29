@@ -5,7 +5,7 @@
       "description": "certmanager_version"
     },
     "harbor_version": {
-      "default": "v6.0.10",
+      "default": "v1.3.4",
       "description": "harbor_version"
     }
   }
