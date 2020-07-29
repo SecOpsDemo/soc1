@@ -1,0 +1,60 @@
+nameOverride: harbor
+
+expose:
+  type: ingress
+  tls:
+    enabled: true
+    secretName: "harbor-core-tls"
+    notarySecretName: "harbor-notary-tls"
+  ingress:
+    hosts:
+      core: "harbor-core.soc1.bespin-mss.com"
+      notary: "harbor-notary.soc1.bespin-mss.como"
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-issuer"
+      ingress.kubernetes.io/proxy-body-size: "0"
+      ingress.kubernetes.io/ssl-redirect: "true"
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/proxy-body-size: "0"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/whitelist-source-range: "0.0.0.0/0"
+
+externalURL: "https://harbor-core.soc1.bespin-mss.com"
+
+harborAdminPassword: "password"
+
+core:
+  podAnnotations:
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+    iam.amazonaws.com/role: "eks-soc1-worker-bucket"
+
+registry:
+  podAnnotations:
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+    iam.amazonaws.com/role: "eks-soc1-worker-bucket"
+
+chartmuseum:
+  podAnnotations:
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+    iam.amazonaws.com/role: "eks-soc1-worker-bucket"
+
+persistence:
+  enabled: true
+  resourcePolicy: "keep"
+  persistentVolumeClaim:
+    registry:
+      storageClass: efs
+    chartmuseum:
+      storageClass: efs
+    jobservice:
+      storageClass: efs
+    database:
+      storageClass: efs
+    redis:
+      storageClass: efs
+    trivy:
+      storageClass: efs
+  imageChartStorage:
+    s3:
+      region: "ap-northeast-2"
+      bucket: "eks-soc1-harbor-storage"
