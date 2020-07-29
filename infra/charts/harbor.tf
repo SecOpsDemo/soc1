@@ -7,7 +7,7 @@ resource "helm_release" "harbor" {
   name      = "harbor"
 
   values = [
-    file("./values/devops/habor.yaml")
+    file("./values/devops/harbor.yaml")
   ]
 
   wait = false
