@@ -1,0 +1,10 @@
+nameOverride: gitlab
+
+# Values for gitlab/gitlab chart on GKE
+# ref. https://blog.dbi-services.com/deploy-gitlab-on-kubernetes-using-helm/
+global:
+  edition: ce
+  hosts:
+    domain: soc1.bespin-mss.com
+certmanager-issuer:
+  email: changyu.seon@bespinglobal.com
