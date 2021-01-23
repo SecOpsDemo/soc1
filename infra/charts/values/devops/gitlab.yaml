@@ -5,6 +5,7 @@ nameOverride: gitlab
 global:
   edition: ce
   hosts:
-    domain: soc1.bespin-mss.com
+    domain: bespin-mss.com
+    hostSuffix: dz
 certmanager-issuer:
   email: changyu.seon@bespinglobal.com
