@@ -7,6 +7,7 @@ global:
   hosts:
     domain: bespin-mss.com
     hostSuffix: dz
+    https: true
   ingress:
     annotations."kubernetes\.io/tls-acme": true
 certmanager:
