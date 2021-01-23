@@ -7,5 +7,9 @@ global:
   hosts:
     domain: bespin-mss.com
     hostSuffix: dz
+  ingress:
+    annotations."kubernetes\.io/tls-acme": true
+certmanager:
+  install: false
 certmanager-issuer:
   email: changyu.seon@bespinglobal.com
